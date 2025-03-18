@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Conteneur pour MySQL
+  db:
+    image: mysql:8.0
+    container_name: trombinoscope-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: trombinoscope
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    volumes:
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - trombinoscope-network
+
+  # Conteneur pour l'application PHP
+  app:
+    build: .
+    container_name: trombinoscope-app
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - trombinoscope-network
+
+networks:
+  trombinoscope-network:
+    driver: bridge
